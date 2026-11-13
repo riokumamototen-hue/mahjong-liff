@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>麻雀カボ熊本本店｜確認</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f3f5f3;
+      padding: 20px;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px 16px;
+      margin-top: 50px;
+    }
+    button {
+      width: 100%;
+      padding: 16px;
+      border: 0;
+      border-radius: 10px;
+      margin-top: 12px;
+      font-size: 16px;
+    }
+    .send {
+      background: #06c755;
+      color: white;
+    }
+    .cancel {
+      background: #eee;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 id="title">確認画面</h2>
+    <p id="status">LINEと接続しています...</p>
+    <button id="send" class="send"
+            onclick="sendMessage()" disabled>
+      問い合わせを送信する
+    </button>
+    <button class="cancel" onclick="liff.closeWindow()">
+      キャンセル
+    </button>
+  </div>
+
+  <script>
+    const LIFF_ID = "2012603848-PSERFLSn";
+
+    const params = new URLSearchParams(location.search);
+    const type = params.get("type") || "table";
+
+    const messages = {
+      table: "卓状況",
+      reserve: "予約",
+      point: "頂確認",
+      instagram: "Instagram"
+    };
+
+    const message = messages[type] || "卓状況";
+
+    document.getElementById("title").innerText =
+      message + "を問い合わせますか？";
+
+    async function init() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+
+        if (!liff.isInClient()) {
+          document.getElementById("status").innerText =
+            "LINEアプリ内から開いてください。";
+          return;
+        }
+
+        document.getElementById("status").innerText =
+          "確認してから送信してください。";
+
+        document.getElementById("send").disabled = false;
+
+      } catch (err) {
+        document.getElementById("status").innerText =
+          "接続エラー: " + err.message;
+      }
+    }
+
+    async function sendMessage() {
+      const btn = document.getElementById("send");
+      btn.disabled = true;
+
+      try {
+        await liff.sendMessages([
+          { type: "text", text: message }
+        ]);
+
+        document.getElementById("status").innerText =
+          "送信しました！";
+
+        setTimeout(() => liff.closeWindow(), 1000);
+
+      } catch (err) {
+        document.getElementById("status").innerText =
+          "送信エラー: " + err.message;
+        btn.disabled = false;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
